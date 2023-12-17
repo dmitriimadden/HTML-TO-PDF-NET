@@ -16,5 +16,10 @@ function convertFile(fileName) {
     const files = axios.post(url);
     return Promise.resolve(files);
 }
+function deleteFile(fileName) {
+    const url = (BASE_URL + "/files/DeleteFile/" + fileName);
+    const files = axios.post(url);
+    return Promise.resolve(files);
+}
 
-export { upload, getInputList, convertFile }
+export { upload, getInputList, convertFile, deleteFile }

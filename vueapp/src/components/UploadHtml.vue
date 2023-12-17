@@ -36,8 +36,10 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Converted</th>
+                    <th>Status</th>
                     <th>Download PDF</th>
+                    <th></th>
+
 
                 </tr>
             </thead>
@@ -64,6 +66,9 @@
                     <td v-else>
                         <h6>No link ready yet</h6>
                     </td>
+                    <td>
+                        <button class="btn btn-danger" @click="deleteFileButton(file.name)" >Remove</button>
+                    </td>
 
 
                 </tr>
@@ -73,7 +78,7 @@
 </template>
 
 <script>
-    import { upload, getInputList, convertFile } from './file-upload.service';
+    import { upload, getInputList, convertFile, deleteFile } from './file-upload.service';
 
     const STATUS_INITIAL = 0, STATUS_SAVING = 1, STATUS_SUCCESS = 2, STATUS_FAILED = 3, STATUS_CONVERTING = 4;
 
@@ -142,10 +147,18 @@
                 // save it
                 this.save(formData);
             },
+            deleteFileButton(fileName) {
+                deleteFile(fileName)
+                    .then(x => {
+                        this.reset();
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        this.uploadError = err.response;
+                    });
+            },
             convertFileButton(fileName) {
-                // handle file changes
                 this.currentStatus = STATUS_CONVERTING;
-
                 convertFile(fileName)
                     .then(x => {
                         this.reset();

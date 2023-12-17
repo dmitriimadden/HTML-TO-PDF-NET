@@ -60,11 +60,44 @@ public class FilesController : ControllerBase
         return new JsonResult(files.ToList());
 
     }
-
-    [HttpPost("{fiileName}")]
-    public async Task<IActionResult> ConvertFile(string fiileName)
+    [HttpPost("{fileName}")]
+    public async Task<IActionResult> DeleteFile(string fileName)
     {
-        var pathPath = @$"./files/input/{fiileName}";
+        string errorMsg = string.Empty;
+        try
+        {
+
+            var html = @$"./files/input/{fileName}";
+            var pdf = @$"./files/output/{fileName.Replace("html", "pdf")}";
+
+            if (System.IO.File.Exists(html))
+            {
+                System.IO.File.Delete(html);
+            }
+            if (System.IO.File.Exists(pdf))
+            {
+                System.IO.File.Delete(pdf);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            errorMsg = ex.Message;
+            return StatusCode(400);
+
+        }
+        finally
+        {
+        }
+
+        return StatusCode(200);
+
+    }
+
+    [HttpPost("{fileName}")]
+    public async Task<IActionResult> ConvertFile(string fileName)
+    {
+        var pathPath = @$"./files/input/{fileName}";
         string errorMsg = string.Empty;
         using var browserFetcher = new BrowserFetcher();
         IBrowser browser;
@@ -81,7 +114,7 @@ public class FilesController : ControllerBase
             {
                 await page.SetContentAsync(html);
                 var result = await page.GetContentAsync();
-                var newPath = @$"./files/output/{fiileName.Replace("html", "pdf")}";
+                var newPath = @$"./files/output/{fileName.Replace("html", "pdf")}";
                 if (!Directory.Exists("./files/output/"))
                 {
                     Directory.CreateDirectory("./files/output/");
@@ -136,15 +169,21 @@ public class FilesController : ControllerBase
             return new JsonResult(fileArrayEx.ToList());
     }
 
-    [HttpGet("{fiileName}")]
-    public async Task<IActionResult> Download(string fiileName)
+    [HttpGet("{fileName}")]
+    public async Task<IActionResult> Download(string fileName)
     {
-        var pathPath = @$"./files/output/{fiileName}";
-        var fileName = System.IO.Path.GetFileName(pathPath);
-        var content = await System.IO.File.ReadAllBytesAsync(pathPath);
-        new FileExtensionContentTypeProvider()
-            .TryGetContentType(fileName, out string contentType);
-        return File(content, contentType, fileName);
+        var pathPath = @$"./files/output/{fileName}";
+        if (System.IO.File.Exists(pathPath))
+        {
+
+            var file = System.IO.Path.GetFileName(pathPath);
+            var content = await System.IO.File.ReadAllBytesAsync(pathPath);
+            new FileExtensionContentTypeProvider()
+                .TryGetContentType(file, out string contentType);
+            return File(content, contentType, file);
+        }
+        else
+            return StatusCode(400);
 
     }
 
