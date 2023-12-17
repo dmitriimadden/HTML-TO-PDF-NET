@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="files\input\" />
     <Folder Include="files\output\" />
   </ItemGroup>
 

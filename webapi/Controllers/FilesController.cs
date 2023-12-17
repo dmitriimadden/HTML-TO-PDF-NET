@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.StaticFiles;
 using PuppeteerSharp;
 using System.Drawing;
+using System.IO;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
 using System.Web.Http.Cors;
@@ -30,7 +31,6 @@ public class FilesController : ControllerBase
                 var path = Path.Combine("./files/", "input");
                 var pathPath = Path.Combine(path, fileName);
                 string errorMsg = string.Empty;
-                var stream = new FileStream(pathPath, FileMode.Create);
 
                 try
                 {
@@ -38,8 +38,12 @@ public class FilesController : ControllerBase
                     {
                         Directory.CreateDirectory(path);
                     }
+                    var stream = new FileStream(pathPath, FileMode.Create);
+
                     await file.CopyToAsync(stream);
                     await stream.FlushAsync();
+                    stream.Close();
+
                 }
                 catch (Exception ex)
                 {
@@ -47,7 +51,6 @@ public class FilesController : ControllerBase
                 }
                 finally
                 {
-                    stream.Close();
                 }
 
             }
@@ -78,7 +81,12 @@ public class FilesController : ControllerBase
             {
                 await page.SetContentAsync(html);
                 var result = await page.GetContentAsync();
-                await page.PdfAsync(@$"./files/output/{fiileName.Replace("html", "pdf")}");
+                var newPath = @$"./files/output/{fiileName.Replace("html", "pdf")}";
+                if (!Directory.Exists("./files/output/"))
+                {
+                    Directory.CreateDirectory("./files/output/");
+                }
+                await page.PdfAsync(newPath);
             }
              await browser.CloseAsync();
              browser.Dispose(); 
@@ -101,8 +109,14 @@ public class FilesController : ControllerBase
     [HttpGet()]
     public async Task<IActionResult> GetInputFiles()
     {
-        string[] fileArrayInput = Directory.GetFiles(pathInput, "*.html");
-        string[] fileArrayOutput = Directory.GetFiles(pathOutput);
+        string[] fileArrayInput =  new string[] { };
+        string[] fileArrayOutput = new string[] { };
+        if (Directory.Exists(pathInput))
+            fileArrayInput = Directory.GetFiles(pathInput, "*.html");
+       
+        if (Directory.Exists(pathOutput))
+            fileArrayOutput = Directory.GetFiles(pathOutput);
+
         var HotsUrl = Request.Scheme + "://" + Request.Host.Value;
 
         List<FileModel> fileArrayEx = new List<FileModel>();
