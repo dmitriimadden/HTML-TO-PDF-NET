@@ -1,7 +1,9 @@
 This is HTML to PDF.Net + Vue Web Service.
 
 The service accept an HTML file from a web client, convert it to PDF using Puppeteer Sharp, and return it to the client.
-The user can send files for conversion by uploading them from computer. The Vue client display the list of files sent to conversion (keeping it in memory). Each list item contain filename, option to download result, option to remove item.
+The user can send files for conversion by uploading them from computer. 
+The Vue client display the list of files sent to conversion (keeping it in memory). 
+Each list item contain filename, option to convert the file, option to download result, option to remove item.
 
 Client: Vue.js
 
